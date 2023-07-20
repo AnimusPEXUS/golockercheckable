@@ -1,4 +1,4 @@
-package sync
+package golockercheckable
 
 import (
 	sync_o "sync"
