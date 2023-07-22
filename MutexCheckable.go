@@ -2,6 +2,8 @@ package golockercheckable
 
 import (
 	sync_o "sync"
+
+	"github.com/AnimusPEXUS/goroutineid"
 )
 
 var _ LockerCheckable = &MutexCheckable{}
@@ -13,6 +15,7 @@ var _ LockerCheckable = &MutexCheckable{}
 type MutexCheckable struct {
 	mutex_o   *sync_o.Mutex
 	is_locked bool
+	goid      uint64
 	s         *sync_o.Mutex
 }
 
@@ -53,8 +56,13 @@ func (self *MutexCheckable) Lock() {
 		self.s.Unlock()
 	}
 
-	self.mutex_o.Lock()
 	self.is_locked = true
+	id, err := goroutineid.GetCurrentGoId_byRuntimeStack()
+	if err != nil {
+		panic("can't get goroutine id")
+	}
+	self.goid = id
+	self.mutex_o.Lock()
 }
 
 // same as sync.Unlock(), except, doesn't results in error when called on
@@ -78,4 +86,31 @@ func (self *MutexCheckable) IsLocked() bool {
 	self.s.Lock()
 	defer self.s.Unlock()
 	return self.is_locked
+}
+
+func (self *MutexCheckable) IsLocakedByMe() (locked bool, byme bool) {
+	self.s.Lock()
+	defer self.s.Unlock()
+
+	id, err := goroutineid.GetCurrentGoId_byRuntimeStack()
+	if err != nil {
+		panic("can't get goroutine id")
+	}
+
+	if self.is_locked {
+		return true, id == self.goid
+	} else {
+		return false, false
+	}
+}
+
+func (self *MutexCheckable) LocekdByWho() (locked bool, goid uint64) {
+	self.s.Lock()
+	defer self.s.Unlock()
+
+	if self.is_locked {
+		return true, self.goid
+	} else {
+		return false, 0
+	}
 }
