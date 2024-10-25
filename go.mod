@@ -1,5 +1,5 @@
 module github.com/AnimusPEXUS/golockercheckable
 
-go 1.20
+go 1.23.2
 
-require github.com/AnimusPEXUS/goroutineid v0.0.0-20230720133607-c9ed2d3b2260
+require github.com/AnimusPEXUS/goroutineid v0.0.0-20241025221308-aa62e013d180
